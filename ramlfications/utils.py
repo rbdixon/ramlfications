@@ -479,8 +479,8 @@ def _get_scheme(item, root):
 
 
 def _get_attribute(attribute, method, raw_data):
-    method_level = _get_method(attribute, method, raw_data)
-    resource_level = _get_resource(attribute, raw_data)
+    method_level = _get_method(attribute, method, raw_data) or {}
+    resource_level = _get_resource(attribute, raw_data) or {}
     return OrderedDict(list(iteritems(method_level)) +
                        list(iteritems(resource_level)))
 
@@ -494,10 +494,12 @@ def _get_inherited_attribute(attribute, root, type_, method, is_):
 # TODO: refactor - this ain't pretty
 def _remove_duplicates(inherit_params, resource_params):
     ret = []
-    if isinstance(resource_params[0], Body):
-        _params = [p.mime_type for p in resource_params]
-    else:
-        _params = [p.name for p in resource_params]
+    _params = []
+    if resource_params is not None:
+        if isinstance(resource_params[0], Body):
+            _params = [p.mime_type for p in resource_params]
+        else:
+            _params = [p.name for p in resource_params]
 
     for p in inherit_params:
         if isinstance(p, Body):
@@ -506,7 +508,9 @@ def _remove_duplicates(inherit_params, resource_params):
         else:
             if p.name not in _params:
                 ret.append(p)
-    ret.extend(resource_params)
+    if resource_params is not None:
+        ret.extend(resource_params)
+
     return ret or None
 
 

@@ -833,35 +833,37 @@ def create_node(name, raw_data, method, parent, root):
             """Set response body."""
             body_list = []
             default_body = {}
-            for (key, spec) in body.items():
-                if key not in MEDIA_TYPES:
-                    # if a root mediaType was defined, the response body
-                    # may omit the mime_type definition
-                    if key in ('schema', 'example'):
-                        default_body[key] = load_schema(spec) if spec else {}
-                else:
-                    mime_type = key
-                    # spec might be '!!null'
-                    raw = spec or body
-                    _schema = {}
-                    _example = {}
-                    if spec:
-                        _schema_spec = _get(spec, 'schema', '')
-                        _example_spec = _get(spec, 'example', '')
-                        if _schema_spec:
-                            _schema = load_schema(_schema_spec)
-                        if _example_spec:
-                            _example = load_schema(_example_spec)
-                    body_list.append(Body(
-                        mime_type=mime_type,
-                        raw=raw,
-                        schema=_schema,
-                        example=_example,
-                        form_params=None,
-                        config=root.config,
-                        errors=root.errors
-                    ))
-            if default_body:
+            if body is not None:
+                for (key, spec) in body.items():
+                    if key not in MEDIA_TYPES:
+                        # if a root mediaType was defined, the response body
+                        # may omit the mime_type definition
+                        if key in ('schema', 'example'):
+                            default_body[key] = load_schema(spec) if spec else {}
+                    else:
+                        mime_type = key
+                        # spec might be '!!null'
+                        raw = spec or body
+                        _schema = {}
+                        _example = {}
+                        if spec:
+                            _schema_spec = _get(spec, 'schema', '')
+                            _example_spec = _get(spec, 'example', '')
+                            if _schema_spec:
+                                _schema = load_schema(_schema_spec)
+                            if _example_spec:
+                                _example = load_schema(_example_spec)
+                        body_list.append(Body(
+                            mime_type=mime_type,
+                            raw=raw,
+                            schema=_schema,
+                            example=_example,
+                            form_params=None,
+                            config=root.config,
+                            errors=root.errors
+                        ))
+
+            if body is not None and default_body:
                 body_list.append(Body(
                     mime_type=root.media_type,
                     raw=body,
